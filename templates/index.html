@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PlacePredict — Student Placement Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-dark:#1d4ed8;--blue-light:#dbeafe;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --surface:#ffffff;--surface2:#f8fafc;--surface3:#f1f5f9;
+  --border:#e2e8f0;--radius:14px;
+  --head:'Syne',sans-serif;--body:'DM Sans',sans-serif;
+}
+body{font-family:var(--body);background:var(--surface2);color:var(--text);min-height:100vh}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.nav-brand{font-family:var(--head);font-size:1.2rem;font-weight:800;color:var(--blue);display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--blue);color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.nav-badge{font-size:11px;background:var(--blue-light);color:var(--blue-dark);padding:3px 10px;border-radius:20px;font-weight:500}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e3a8a,#2563eb 60%,#3b82f6);padding:3rem 2rem 2.5rem;text-align:center;color:#fff}
+.hero-tag{display:inline-block;background:rgba(255,255,255,0.15);color:#bfdbfe;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-bottom:1rem}
+.hero h1{font-family:var(--head);font-size:2.4rem;font-weight:800;line-height:1.15;margin-bottom:.75rem}
+.hero h1 span{color:#93c5fd}
+.hero p{color:#bfdbfe;font-size:15px;max-width:500px;margin:0 auto 1.5rem;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.12)}
+.hstat strong{display:block;font-family:var(--head);font-size:1.6rem;font-weight:800;color:#fff}
+.hstat span{font-size:12px;color:#93c5fd}
+
+/* MAIN */
+.main{max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1.25rem}
+.card-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:620px){.grid-2{grid-template-columns:1fr}}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)}
+.field input,.field select{font-family:var(--body);font-size:14px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;outline:none;transition:border-color .15s,background .15s}
+.field input:focus,.field select:focus{border-color:var(--blue);background:#fff}
+.field input::placeholder{color:var(--text3)}
+
+/* SKILL CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+.chip{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);font-weight:500}
+.chip .cd{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* SUBMIT */
+.submit-btn{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:var(--head);font-size:16px;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.01em;margin-top:.5rem}
+.submit-btn:hover{background:var(--blue-dark)}
+.submit-btn:active{transform:scale(.99)}
+.submit-btn:disabled{background:#93c5fd;cursor:not-allowed}
+
+/* RESULT */
+#result-section{display:none}
+
+.result-hero{border-radius:var(--radius);padding:2rem;margin-bottom:1.25rem}
+.result-hero.placed{background:var(--green-light);border:1px solid #86efac}
+.result-hero.moderate{background:var(--amber-light);border:1px solid #fcd34d}
+.result-hero.unlikely{background:var(--red-light);border:1px solid #fca5a5}
+
+.r-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:.75rem}
+.placed .r-badge{background:var(--green);color:#fff}
+.moderate .r-badge{background:var(--amber);color:#fff}
+.unlikely .r-badge{background:var(--red);color:#fff}
+
+.r-headline{font-family:var(--head);font-size:1.6rem;font-weight:800;margin-bottom:.25rem}
+.placed .r-headline{color:#14532d}
+.moderate .r-headline{color:#78350f}
+.unlikely .r-headline{color:#7f1d1d}
+
+.r-sub{font-size:14px;margin-bottom:1rem}
+.placed .r-sub{color:#166534}
+.moderate .r-sub{color:#92400e}
+.unlikely .r-sub{color:#991b1b}
+
+.prob-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.prob-label-text{font-size:13px;color:var(--text2)}
+.prob-num{font-family:var(--head);font-size:1.5rem;font-weight:800}
+.placed .prob-num{color:var(--green)}
+.moderate .prob-num{color:var(--amber)}
+.unlikely .prob-num{color:var(--red)}
+
+.bar-bg{background:rgba(0,0,0,0.1);border-radius:6px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;width:0%;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.placed .bar-fill{background:var(--green)}
+.moderate .bar-fill{background:var(--amber)}
+.unlikely .bar-fill{background:var(--red)}
+
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+@media(max-width:620px){.insight-grid{grid-template-columns:1fr}}
+
+.i-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem}
+.i-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px}
+.i-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.i-list li{font-size:13px;color:var(--text2);display:flex;gap:8px;align-items:flex-start;line-height:1.55}
+.i-list li::before{content:'→';color:var(--blue);font-size:12px;flex-shrink:0;margin-top:2px}
+
+.co-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.co-pill{padding:4px 12px;background:var(--blue-light);color:var(--blue-dark);border-radius:20px;font-size:12px;font-weight:500}
+
+.reset-btn{display:inline-block;margin-top:1rem;font-size:13px;color:var(--blue);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:var(--body)}
+
+/* MODEL INFO BADGE */
+.model-badge{display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);margin-bottom:1.5rem;width:fit-content}
+.model-badge strong{color:var(--text);font-weight:500}
+
+/* FOOTER */
+footer{text-align:center;padding:2rem;font-size:12px;color:var(--text3);border-top:1px solid var(--border);background:var(--surface)}
+footer a{color:var(--blue);text-decoration:none}
+
+/* LOADING */
+.shimmer{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shim 1.3s infinite;border-radius:6px;height:14px;margin:8px 0}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span>P</span> PlacePredict
+  </div>
+  <div class="nav-badge">Random Forest · 96% Accuracy</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">AI · Campus Placement · India</div>
+  <h1>Will You Get <span>Placed?</span><br>Find Out Now.</h1>
+  <p>Enter your academic & skill profile. Our Random Forest ML model predicts your placement probability with personalized career insights.</p>
+  <div class="hero-stats">
+    <div class="hstat"><strong>96%</strong><span>Model Accuracy</span></div>
+    <div class="hstat"><strong>2000+</strong><span>Training Records</span></div>
+    <div class="hstat"><strong>13</strong><span>Parameters Analyzed</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="model-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <span>Powered by <strong>scikit-learn Random Forest</strong> trained on 2,000 student records · Built for College Project Expo</span>
+  </div>
+
+  <div id="form-section">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Academic Profile</div>
+      <div class="grid-2">
+        <div class="field"><label>Full Name</label><input type="text" id="name" placeholder="e.g. Rahul Sharma"/></div>
+        <div class="field">
+          <label>Branch / Stream</label>
+          <select id="branch">
+            <option value="">Select your branch</option>
+            <option>Computer Science & Engineering</option>
+            <option>Information Technology</option>
+            <option>Electronics & Communication</option>
+            <option>Mechanical Engineering</option>
+            <option>Civil Engineering</option>
+            <option>Electrical Engineering</option>
+            <option>Data Science & AI</option>
+            <option>MBA / Management</option>
+            <option>BCA / MCA</option>
+          </select>
+        </div>
+        <div class="field"><label>CGPA (out of 10)</label><input type="number" id="cgpa" step="0.01" min="4" max="10" placeholder="e.g. 8.2"/></div>
+        <div class="field"><label>12th / Diploma %</label><input type="number" id="hsc" step="0.1" min="40" max="100" placeholder="e.g. 85.5"/></div>
+        <div class="field"><label>10th Percentage</label><input type="number" id="ssc" step="0.1" min="40" max="100" placeholder="e.g. 90.0"/></div>
+        <div class="field"><label>Active Backlogs</label><input type="number" id="backlogs" min="0" max="20" placeholder="0"/></div>
+        <div class="field">
+          <label>Internships Done</label>
+          <select id="internships">
+            <option value="0">None</option>
+            <option value="1">1 Internship</option>
+            <option value="2">2 Internships</option>
+            <option value="3">3+ Internships</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Projects Completed</label>
+          <select id="projects">
+            <option value="0">None</option>
+            <option value="1">1–2 Projects</option>
+            <option value="3">3–4 Projects</option>
+            <option value="5">5+ Projects</option>
+          </select>
+        </div>
+        <div class="field"><label>Aptitude Score (%)</label><input type="number" id="aptitude" min="0" max="100" placeholder="e.g. 72"/></div>
+        <div class="field">
+          <label>Communication Skills</label>
+          <select id="comm">
+            <option value="">Select level</option>
+            <option value="poor">Poor</option>
+            <option value="average">Average</option>
+            <option value="good">Good</option>
+            <option value="excellent">Excellent</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Technical Skills <span style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none">(select all you know)</span></div>
+      <div class="chips" id="tech-chips">
+        <div class="chip" data-s="Python"><span class="cd"></span>Python</div>
+        <div class="chip" data-s="Java"><span class="cd"></span>Java</div>
+        <div class="chip" data-s="C/C++"><span class="cd"></span>C/C++</div>
+        <div class="chip" data-s="JavaScript"><span class="cd"></span>JavaScript</div>
+        <div class="chip" data-s="SQL"><span class="cd"></span>SQL / Databases</div>
+        <div class="chip" data-s="DSA"><span class="cd"></span>DSA</div>
+        <div class="chip" data-s="ML"><span class="cd"></span>Machine Learning</div>
+        <div class="chip" data-s="Web Dev"><span class="cd"></span>Web Development</div>
+        <div class="chip" data-s="Cloud"><span class="cd"></span>Cloud (AWS/Azure)</div>
+        <div class="chip" data-s="React"><span class="cd"></span>React / Angular</div>
+        <div class="chip" data-s="Node"><span class="cd"></span>Node.js / Backend</div>
+        <div class="chip" data-s="MATLAB"><span class="cd"></span>MATLAB</div>
+        <div class="chip" data-s="Power BI"><span class="cd"></span>Power BI / Tableau</div>
+        <div class="chip" data-s="AutoCAD"><span class="cd"></span>AutoCAD</div>
+        <div class="chip" data-s="Cyber"><span class="cd"></span>Cybersecurity</div>
+        <div class="chip" data-s="DevOps"><span class="cd"></span>DevOps / Docker</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Extracurriculars & Certifications</div>
+      <div class="chips" id="extra-chips">
+        <div class="chip" data-e="hackathon"><span class="cd"></span>Hackathons</div>
+        <div class="chip" data-e="cp"><span class="cd"></span>Competitive Programming</div>
+        <div class="chip" data-e="opensource"><span class="cd"></span>Open Source</div>
+        <div class="chip" data-e="paper"><span class="cd"></span>Research Paper</div>
+        <div class="chip" data-e="leader"><span class="cd"></span>Leadership / Clubs</div>
+        <div class="chip" data-e="sports"><span class="cd"></span>Sports / Cultural</div>
+        <div class="chip" data-e="cert1"><span class="cd"></span>Coursera / NPTEL Cert</div>
+        <div class="chip" data-e="cert2"><span class="cd"></span>Google / AWS Cert</div>
+        <div class="chip" data-e="cert3"><span class="cd"></span>Udemy / LinkedIn Cert</div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="predict-btn" onclick="predict()">Predict My Placement Chances →</button>
+  </div>
+
+  <div id="result-section">
+    <div id="r-hero" class="result-hero placed">
+      <div class="r-badge" id="r-badge">● Highly Likely</div>
+      <div class="r-headline" id="r-headline">Great placement prospects!</div>
+      <div class="r-sub" id="r-sub">Your profile is strong.</div>
+      <div class="prob-row">
+        <span class="prob-label-text">Placement Probability</span>
+        <span class="prob-num" id="prob-num">0%</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="bar-fill"></div></div>
+    </div>
+
+    <div class="insight-grid" id="insight-grid" style="display:none">
+      <div class="i-card"><h4>Your Strengths</h4><ul class="i-list" id="strengths-ul"></ul></div>
+      <div class="i-card"><h4>Areas to Improve</h4><ul class="i-list" id="improve-ul"></ul></div>
+      <div class="i-card">
+        <h4>Recommended Companies</h4>
+        <div class="co-pills" id="companies-div"></div>
+      </div>
+      <div class="i-card"><h4>30-Day Action Plan</h4><ul class="i-list" id="actions-ul"></ul></div>
+    </div>
+
+    <div id="loading-block">
+      <div class="shimmer" style="width:75%"></div>
+      <div class="shimmer" style="width:60%"></div>
+      <div class="shimmer" style="width:82%"></div>
+    </div>
+
+    <button class="reset-btn" onclick="reset()">← Predict for another student</button>
+  </div>
+</div>
+
+<footer>
+  Built for College Project Expo · Random Forest ML Model (scikit-learn) · 96.25% accuracy on test data<br/>
+  <a href="https://github.com" target="_blank">View on GitHub</a> · Made with Python + Flask
+</footer>
+
+<script>
+const techChips = new Set();
+const extraChips = new Set();
+
+document.querySelectorAll('#tech-chips .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    c.classList.toggle('on');
+    const s = c.dataset.s;
+    techChips.has(s)?techChips.delete(s):techChips.add(s);
+  });
+});
+document.querySelectorAll('#extra-chips .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    c.classList.toggle('on');
+    const s = c.dataset.e;
+    extraChips.has(s)?extraChips.delete(s):extraChips.add(s);
+  });
+});
+
+function reset(){
+  document.getElementById('result-section').style.display='none';
+  document.getElementById('form-section').style.display='block';
+  document.getElementById('predict-btn').disabled=false;
+  document.getElementById('predict-btn').textContent='Predict My Placement Chances →';
+}
+
+async function predict(){
+  const branch=document.getElementById('branch').value;
+  const cgpa=parseFloat(document.getElementById('cgpa').value);
+  const hsc=parseFloat(document.getElementById('hsc').value);
+  const ssc=parseFloat(document.getElementById('ssc').value);
+  const backlogs=parseInt(document.getElementById('backlogs').value)||0;
+  const internships=parseInt(document.getElementById('internships').value)||0;
+  const projects=parseInt(document.getElementById('projects').value)||0;
+  const aptitude=parseFloat(document.getElementById('aptitude').value)||65;
+  const comm=document.getElementById('comm').value;
+
+  if(!branch||isNaN(cgpa)||isNaN(hsc)||isNaN(ssc)||!comm){
+    alert('Please fill all required fields: Branch, CGPA, 12th %, 10th %, and Communication level.');
+    return;
+  }
+
+  const certCount = [...extraChips].filter(e=>e.startsWith('cert')).length;
+  const hackathon = extraChips.has('hackathon')?1:0;
+  const extraCount = extraChips.size - certCount;
+
+  const payload={
+    branch, cgpa, hsc_percent:hsc, ssc_percent:ssc, backlogs,
+    internships, projects, aptitude_score:aptitude, comm,
+    tech_skills_count:techChips.size,
+    extra_activities:extraCount,
+    certifications:certCount,
+    hackathons:hackathon
+  };
+
+  const btn=document.getElementById('predict-btn');
+  btn.disabled=true;btn.textContent='Analyzing...';
+  document.getElementById('form-section').style.display='none';
+  document.getElementById('result-section').style.display='block';
+  document.getElementById('loading-block').style.display='block';
+  document.getElementById('insight-grid').style.display='none';
+  document.getElementById('r-hero').style.opacity='0.5';
+
+  try{
+    const res=await fetch('/predict',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!data.success) throw new Error(data.error);
+
+    document.getElementById('loading-block').style.display='none';
+    document.getElementById('r-hero').style.opacity='1';
+
+    const p=data.probability;
+    let cls=p>=75?'placed':p>=40?'moderate':'unlikely';
+    const hero=document.getElementById('r-hero');
+    hero.className='result-hero '+cls;
+
+    document.getElementById('r-badge').textContent='● '+data.verdict;
+    const names={placed:'Great placement prospects!',moderate:'Solid profile — keep pushing!',unlikely:'Room to grow — act now!'};
+    document.getElementById('r-headline').textContent=names[cls];
+
+    const subs={placed:'Your profile is highly competitive for campus placements.',moderate:'You have a decent profile. Focused effort can push you to the top tier.',unlikely:'Your profile needs work, but with the right actions, placement is achievable.'};
+    document.getElementById('r-sub').textContent=subs[cls];
+
+    const fill=document.getElementById('bar-fill');
+    const numEl=document.getElementById('prob-num');
+    fill.style.width='0%'; numEl.textContent='0%';
+    setTimeout(()=>{
+      fill.style.width=p+'%';
+      let cur=0; const step=p/60;
+      const t=setInterval(()=>{cur=Math.min(cur+step,p);numEl.textContent=Math.round(cur)+'%';if(cur>=p)clearInterval(t);},18);
+    },100);
+
+    document.getElementById('strengths-ul').innerHTML=(data.strengths||[]).map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('improve-ul').innerHTML=(data.improvements||[]).map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('companies-div').innerHTML=(data.companies||[]).map(c=>`<span class="co-pill">${c}</span>`).join('');
+    document.getElementById('actions-ul').innerHTML=(data.actions||[]).map(s=>`<li>${s}</li>`).join('');
+
+    document.getElementById('insight-grid').style.display='grid';
+  }catch(e){
+    document.getElementById('loading-block').style.display='none';
+    document.getElementById('r-hero').style.opacity='1';
+    document.getElementById('r-headline').textContent='Error occurred';
+    document.getElementById('r-sub').textContent=e.message;
+  }
+}
+</script>
+</body>
+</html>
